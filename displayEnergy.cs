@@ -1,4 +1,6 @@
-public void Program()
+const string decimalFormat = "#0.00";
+const double maxInputTurbine = 371.59;
+public Program()
 {
     Runtime.UpdateFrequency = UpdateFrequency.Update10;
     //This makes the program run automatically every 10 ticks.
@@ -20,13 +22,12 @@ public void Main()
     // create lines
     var lines = new []
     {
-        // for y position : +50 is ok
         new { Data = "Energy Informations \n\n", Position = new Vector2(100, 20), Scale = 1.5f, FontColor = Color.Yellow },
-        new { Data = BatteriesTotalInfos(batteriesList), Position = new Vector2(50, 70), Scale = 1.0f, FontColor = Color.White},
-        new { Data = WindTurbinesTotalInfos(windTurbinesList), Position = new Vector2(50, 120), Scale = 1.0f, FontColor = Color.White }
+        new { Data = BatteriesTotalInfos(batteriesList), Position = new Vector2(10, 70), Scale = 1.0f, FontColor = Color.White},
+        new { Data = WindTurbinesTotalInfos(windTurbinesList), Position = new Vector2(10, 200), Scale = 1.0f, FontColor = Color.White }
     };
 
-    // display lines on panel
+    // display lines on panelq
     foreach(var line in lines)
     {
         var textSprite = new MySprite()
@@ -49,18 +50,23 @@ public void Main()
 
 string BatteryInfosToText(float currentInput, float maxInput, float currentStoredPower, float maxStoredPower, float currentOutput)
 {   
-    float rechargeTime = 0;
-    if(currentInput - currentOutput >= 0){
-        rechargeTime= (maxStoredPower -currentStoredPower)/(currentInput - currentOutput);
+    float time = 0;
+    float flux = currentInput - currentOutput;
+    if(flux >= 0){
+        time = (maxStoredPower -currentStoredPower)/(currentInput - currentOutput);
+    }else {
+        time = currentStoredPower/currentOutput;
     }
      
     string textInfos = "";
-    textInfos += "Input: "+ currentInput.ToString()+ " / "+ maxInput.ToString() +" MW\n";
-    textInfos += "Stored: "+ currentStoredPower.ToString() + " / " + maxStoredPower.ToString() + " MWh ( "+(currentStoredPower/maxStoredPower*100).ToString() +" % "+")\n";
-    if(rechargeTime > 0){
-        textInfos += "Recharging time : "+ rechargeTime.ToString() + " hours\n";
+    textInfos += "Batteries flux: "+ flux.ToString(decimalFormat)+" / "+ maxInput.ToString() + " MW\n";
+    textInfos += "Stored Power: "+ currentStoredPower.ToString(decimalFormat) + " / " + maxStoredPower.ToString() + " MWh ( "+(currentStoredPower/maxStoredPower*100).ToString(decimalFormat) +" % "+")\n";
+    if(flux > 0){
+        textInfos += "recharging batteries \n";
+        textInfos += "Recharging time : "+ time.ToString(decimalFormat) + " hours \n\n";
     }else {
-        textInfos += "Recharging time : discharges\n\n";
+        textInfos += "Batteries discharge \n";
+        textInfos += "Discharging time : "+time.ToString(decimalFormat) +"\n\n";
     }
     
     return textInfos;
@@ -92,20 +98,16 @@ string BatteriesTotalInfos(List<IMyBatteryBlock> list)
 string WindTurbinesTotalInfos(List<IMyWindTurbine> list)
 {
     string textTotal = "";
-    float efficiency = 0;
     float currentOutput = 0;
-    float ratio = 0;
+    double maxOutput = (maxInputTurbine * list.Count)/1000; // MW
 
      for (int i = 0; i < list.Count; i++)
-    {
-        efficiency += list[i].Effectivity;
-        currentOutput += list[i].CurrentOutput;
-        ratio += list[i].CurrentOutputRatio;
+    {  
+        currentOutput += list[i].CurrentOutput;      
     }
 
-    textTotal += "Production Efficiency : " + efficiency/list.Count + " %\n";
-    textTotal += "Production CurrentOutput : "+ currentOutput + " MW\n";
-    textTotal += "Production Ratio : "+ ratio + "\n\n";
+    textTotal += "Wind Turbines : "+ currentOutput.ToString(decimalFormat) + " / " + maxOutput.ToString(decimalFormat) +" MW\n";
+  
     return textTotal;
 
 }
