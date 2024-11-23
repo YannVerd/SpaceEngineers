@@ -63,10 +63,10 @@ string BatteryInfosToText(float currentInput, float maxInput, float currentStore
     textInfos += "Stored Power: "+ currentStoredPower.ToString(decimalFormat) + " / " + maxStoredPower.ToString() + " MWh ( "+(currentStoredPower/maxStoredPower*100).ToString(decimalFormat) +" % "+")\n";
     if(flux > 0){
         textInfos += "recharging batteries \n";
-        textInfos += "Recharging time : "+ time.ToString(decimalFormat) + " hours \n\n";
+        textInfos += "Recharging time : "+ TranslateTimestoHMinFormat(time) + "\n\n";
     }else {
         textInfos += "Batteries discharge \n";
-        textInfos += "Discharging time : "+time.ToString(decimalFormat) +"\n\n";
+        textInfos += "Discharging time : "+ TranslateTimestoHMinFormat(time) +"\n\n";
     }
     
     return textInfos;
@@ -110,4 +110,13 @@ string WindTurbinesTotalInfos(List<IMyWindTurbine> list)
   
     return textTotal;
 
+}
+
+string TranslateTimestoHMinFormat(float time)
+{
+    if(time%1 != 0){
+        return time.ToString("#0") + " Hours " + (time%1 * 60).ToString("00") + " Min";
+    }else {
+        return time.ToString("#0") + " Hours";
+    }
 }
